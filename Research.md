@@ -7,6 +7,10 @@ This file documnets the research I did throughout the project
 Note from the [documentation](https://pypi.org/project/keyboard/) 
 - "This program makes no attempt to hide itself"  
 
+### pynput module
+
+[documentation](https://pypi.org/project/pynput/)
+
 ### Windows compatability
 
 [GeeksForGeeks](https://www.geeksforgeeks.org/design-a-keylogger-in-python/)
