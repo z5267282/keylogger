@@ -14,7 +14,8 @@ def on_release(key):
 def with_statement():
     with keyboard.Listener(
             on_press=on_press,
-            on_release=on_release) as listener:
+            on_release=on_release
+    ) as listener:
         listener.join()
 
 def no_with():
@@ -24,3 +25,11 @@ def no_with():
         on_release=on_release
     )
     listener.start()
+    try:
+        listener.wait()
+        listener.join()
+    finally:
+        listener.stop()
+
+with_statement()
+# no_with()
