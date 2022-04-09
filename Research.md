@@ -15,6 +15,9 @@ Note from the [documentation](https://pypi.org/project/keyboard/)
 
 [GeeksForGeeks](https://www.geeksforgeeks.org/design-a-keylogger-in-python/)
 
+### application in focus
+[Stack Overflow](https://stackoverflow.com/questions/3130912/how-do-i-detect-the-currently-focused-application)
+
 ### Miscellaneous
 
 Hyphens in filenames on windows are legal 
