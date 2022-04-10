@@ -25,11 +25,12 @@ def no_with():
         on_release=on_release
     )
     listener.start()
-    try:
-        listener.wait()
-        listener.join()
-    finally:
-        listener.stop()
+    listener.join()
+    # try:
+    #     listener.wait()
+    #     listener.join()
+    # finally:
+    #     listener.stop()
 
-with_statement()
-# no_with()
+# with_statement()
+no_with()
