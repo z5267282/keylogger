@@ -13,7 +13,7 @@ Note from the [documentation](https://pypi.org/project/keyboard/)
 
 [tracking mouse and keyboard](https://nitratine.net/blog/post/how-to-use-pynputs-mouse-and-keyboard-listener-at-the-same-time/?ref=morioh.com&utm_source=morioh.com)
 
-[text printed out to terminal](https://nitratine.net/blog/post/how-to-use-pynputs-mouse-and-keyboard-listener-at-the-same-time/?ref=morioh.com&utm_source=morioh.com)
+[text printed out to terminal](https://stackoverflow.com/questions/67724430/pynput-prints-entered-keys-when-keyboard-listener-finishes)
 
 ### Windows compatability
 
