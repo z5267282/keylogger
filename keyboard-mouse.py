@@ -7,7 +7,7 @@ done = False
 def on_press(key):
     # print(type(key))
     try:
-        print(key.char)
+        print(key.char, end='')
     except AttributeError:
         if key == keyboard.Key.esc:
             global done
