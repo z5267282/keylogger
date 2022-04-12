@@ -11,6 +11,10 @@ Note from the [documentation](https://pypi.org/project/keyboard/)
 
 [documentation](https://pypi.org/project/pynput/)
 
+[tracking mouse and keyboard](https://nitratine.net/blog/post/how-to-use-pynputs-mouse-and-keyboard-listener-at-the-same-time/?ref=morioh.com&utm_source=morioh.com)
+
+[text printed out to terminal](https://nitratine.net/blog/post/how-to-use-pynputs-mouse-and-keyboard-listener-at-the-same-time/?ref=morioh.com&utm_source=morioh.com)
+
 ### Windows compatability
 
 [GeeksForGeeks](https://www.geeksforgeeks.org/design-a-keylogger-in-python/)
