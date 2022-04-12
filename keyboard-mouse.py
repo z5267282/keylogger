@@ -12,6 +12,7 @@ def on_press(key):
     try:
         keys += key.char
     except AttributeError:
+        keys += str(key)
         if key == keyboard.Key.esc:
             global done
             done = True
@@ -27,10 +28,16 @@ k.start()
 m = mouse.Listener(on_click=on_click)
 m.start()
 
-while not done:
-    pass
+print('z')
+
+k.join()
+m.join()
+
+print('a')
 
 m.stop()
+
+print('b')
 
 with open('keys.txt', 'w') as f:
     f.write(keys)
