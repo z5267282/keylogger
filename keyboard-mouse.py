@@ -4,10 +4,13 @@ from pynput import keyboard, mouse
 
 done = False
 
+keys = str()
+mice = list()
+
 def on_press(key):
-    # print(type(key))
+    global keys
     try:
-        print(key.char, end='')
+        keys += key.char
     except AttributeError:
         if key == keyboard.Key.esc:
             global done
@@ -16,7 +19,7 @@ def on_press(key):
 
 def on_click(x, y, button, pressed):
     if pressed:
-        print(f'({x},{y}), {button}, {pressed}')
+        mice.append(f'({x},{y}), {button}, {pressed}')
 
 k = keyboard.Listener(on_press=on_press)
 k.start()
@@ -28,3 +31,9 @@ while not done:
     pass
 
 m.stop()
+
+print('Keys:')
+print(keys)
+
+print('\nMice')
+print('\n'.join(mice))
