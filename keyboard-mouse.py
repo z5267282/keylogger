@@ -32,8 +32,8 @@ while not done:
 
 m.stop()
 
-print('Keys:')
-print(keys)
+with open('keys.txt', 'w') as f:
+    f.write(keys)
 
-print('\nMice')
-print('\n'.join(mice))
+with open('mice.txt', 'w') as f:
+    f.write('\n'.join(mice))
