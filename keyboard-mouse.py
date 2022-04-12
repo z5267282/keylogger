@@ -5,8 +5,9 @@ from pynput import keyboard, mouse
 done = False
 
 def on_press(key):
+    # print(type(key))
     try:
-        print(key.char, end='')
+        print(key.char)
     except AttributeError:
         if key == keyboard.Key.esc:
             global done
@@ -14,7 +15,8 @@ def on_press(key):
             return False
 
 def on_click(x, y, button, pressed):
-    print(f'({x},{y}), {button}, {pressed}')
+    if pressed:
+        print(f'({x},{y}), {button}, {pressed}')
 
 k = keyboard.Listener(on_press=on_press)
 k.start()
