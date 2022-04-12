@@ -28,16 +28,9 @@ k.start()
 m = mouse.Listener(on_click=on_click)
 m.start()
 
-print('z')
-
-k.join()
-m.join()
-
-print('a')
-
+while not done:
+    pass
 m.stop()
-
-print('b')
 
 with open('keys.txt', 'w') as f:
     f.write(keys)
