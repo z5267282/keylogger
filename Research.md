@@ -24,7 +24,16 @@ Note from the [documentation](https://pypi.org/project/keyboard/)
 
 [Apple](https://stackoverflow.com/questions/3324372/finding-the-app-window-currently-in-focus-on-mac-osx)
 
+### pyinstaller .exe creation
+[Documentation](https://pyinstaller.org/en/stable/operating-mode.html)
+
 ### Miscellaneous
 
 Hyphens in filenames on windows are legal 
 - [Link](https://devblogs.microsoft.com/oldnewthing/20140603-00/?p=823)
+
+Interfaces and abstract classes in python
+- [Link](https://www.godaddy.com/engineering/2018/12/20/python-metaclasses/)
+
+DOS to UNIX files - shell command
+- [Link](https://phoenixnap.com/kb/convert-dos-to-unix#:~:text=one%2Dliner%20command-,Option%201%3A%20Converting%20DOS%20to%20UNIX%20with%20dos2unix%20Command,to%20use%20the%20dos2unix%20tool.&text=The%20command%20converts%20the%20file,attribute%20before%20the%20file%20name.)
