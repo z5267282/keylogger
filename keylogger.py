@@ -43,13 +43,12 @@ class Monitor:
         print(key)
     
     def on_click(self, x, y, button, pressed):
-        print('here!')
         if pressed:
             print(button)
 
     def __init__(self):
         self.keys = keyboard.Listener(on_press=self.on_press)
-        self.mice = keyboard.Listener(on_click=self.on_click)
+        self.mice = mouse.Listener(on_click=self.on_click)
     
     def run(self):
         self.keys.start()
