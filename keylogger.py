@@ -73,13 +73,19 @@ class Monitor:
         self.mice.start()
 
         app = get_focus_app_string()
+        apps = dict()
         prev = None
         while not self.done:
+            # Handle a newly seen app
             if prev is None or prev != app:
                 print(f"{timestamp()} - '{app}'")
+                if not app in apps:
+                    apps[app] = 1
                 prev = app
 
             app = get_focus_app_string()                
+        
+        print('Most used apps in session:')
 
 def main():
     monitor = Monitor()
