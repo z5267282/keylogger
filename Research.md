@@ -22,6 +22,8 @@ Note from the [documentation](https://pypi.org/project/keyboard/)
 ### application in focus
 [Stack Overflow](https://stackoverflow.com/questions/3130912/how-do-i-detect-the-currently-focused-application)
 
+[Apple](https://stackoverflow.com/questions/3324372/finding-the-app-window-currently-in-focus-on-mac-osx)
+
 ### Miscellaneous
 
 Hyphens in filenames on windows are legal 
