@@ -66,7 +66,10 @@ class Monitor:
             print(button)
 
     def __init__(self):
+        # state variables
         self.done = False
+        
+        # listeners
         self.keys = keyboard.Listener(on_press=self.on_press)
         self.mice = mouse.Listener(on_click=self.on_click)
     
