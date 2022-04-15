@@ -56,6 +56,8 @@ def get_focus_app_string():
 """
 
 class Monitor:
+    passphrase = "I'm fishing in the river champion!"
+
     def __init__(self):
         # state variables
         self.done = False
