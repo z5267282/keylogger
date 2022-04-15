@@ -2,5 +2,5 @@
 __pycache__/
 build/
 dist/
-keylogger.spec
+*.spec
 logs.json
