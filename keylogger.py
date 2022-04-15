@@ -68,12 +68,12 @@ class Monitor:
             self.text = str()
             self.logs.append({'s' : key.name.upper()})
 
+    # pass in x and y to follow expected parameters of on_click
     def on_click(self, x, y, button, pressed):
-        # if self.done:
-        #     return False
-        # if pressed:
-        #     print(button)
-        pass
+        if (pressed):
+            self.logs.append({'o' : self.text})
+            self.text = str()
+            self.logs.append({'m' : button.name.upper()})
 
     def __init__(self):
         # state variables
