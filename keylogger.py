@@ -58,16 +58,28 @@ class Monitor:
     def on_press(self, key):
         if (key == keyboard.Key.esc):
             self.done = True
+        
+        try:
+            self.text += key.char
+        
+        # when we hit a special character we update all regular text
+        except AttributeError:
+            self.logs.append({'o' : self.text})
+            self.text = str()
+            self.logs.append({'s' : key.name.upper()})
 
     def on_click(self, x, y, button, pressed):
-        if self.done:
-            return False
-        if pressed:
-            print(button)
+        # if self.done:
+        #     return False
+        # if pressed:
+        #     print(button)
+        pass
 
     def __init__(self):
         # state variables
         self.done = False
+        self.logs = list()
+        self.text = str()
         
         # listeners
         self.keys = keyboard.Listener(on_press=self.on_press)
@@ -97,6 +109,8 @@ class Monitor:
         print('Most used apps in session:')
         for application, count in sort_dict_descending_keys(apps):
             print(f"'{application}' : {count}")
+        
+        print(self.logs)
 
 def main():
     monitor = Monitor()
