@@ -78,6 +78,7 @@ class Monitor:
     def on_press(self, key):
         if (key == keyboard.Key.esc):
             self.done = True
+            return False
         
         try:
             self.text += key.char
@@ -87,6 +88,9 @@ class Monitor:
 
     # pass in x and y to follow expected parameters of on_click
     def on_click(self, x, y, button, pressed):
+        if self.done:
+            return False
+
         if (pressed):
             self.record_raw_input({'m' : button.name.upper()})
 
