@@ -1,0 +1,4 @@
+#!/bin/dash
+
+rm -rf __pycache__ build dist 
+rm *.spec
