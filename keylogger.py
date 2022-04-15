@@ -4,6 +4,7 @@ from AppKit import NSWorkspace
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import json
 from pynput import keyboard, mouse
 import smtplib
 
@@ -55,26 +56,6 @@ def get_focus_app_string():
 """
 
 class Monitor:
-    def on_press(self, key):
-        if (key == keyboard.Key.esc):
-            self.done = True
-        
-        try:
-            self.text += key.char
-        
-        # when we hit a special character we update all regular text
-        except AttributeError:
-            self.logs.append({'o' : self.text})
-            self.text = str()
-            self.logs.append({'s' : key.name.upper()})
-
-    # pass in x and y to follow expected parameters of on_click
-    def on_click(self, x, y, button, pressed):
-        if (pressed):
-            self.logs.append({'o' : self.text})
-            self.text = str()
-            self.logs.append({'m' : button.name.upper()})
-
     def __init__(self):
         # state variables
         self.done = False
@@ -85,33 +66,38 @@ class Monitor:
         self.keys = keyboard.Listener(on_press=self.on_press)
         self.mice = mouse.Listener(on_click=self.on_click)
     
+    def record_raw_input(self, input_dict):
+        # only record text if it's not empty
+        if self.text:
+            self.logs.append({'o' : self.text})
+            self.text = str()
+        self.logs.append(input_dict)
+
+    def on_press(self, key):
+        if (key == keyboard.Key.esc):
+            self.done = True
+        
+        try:
+            self.text += key.char
+        # when we hit a special character we update all regular text
+        except AttributeError:
+            self.record_raw_input({'s' : key.name.upper()})
+
+    # pass in x and y to follow expected parameters of on_click
+    def on_click(self, x, y, button, pressed):
+        if (pressed):
+            self.record_raw_input({'m' : button.name.upper()})
+
     def run(self):
         self.keys.start()
         self.mice.start()
 
-        app = get_focus_app_string()
-        apps = dict()
-        prev = None
         while not self.done:
-            # Handle a newly seen app
-            if prev is None or prev != app:
-                print(f"{timestamp()} - '{app}'")
-
-                if not app in apps:
-                    apps[app] = 1
-                else:
-                    apps[app] += 1
-
-                prev = app
-
-            app = get_focus_app_string()                
+            pass
         
-        print('Most used apps in session:')
-        for application, count in sort_dict_descending_keys(apps):
-            print(f"'{application}' : {count}")
+        with open('logs.json', 'w') as f:
+            f.write(json.dumps(self.logs, indent=4))
         
-        print(self.logs)
-
 def main():
     monitor = Monitor()
     monitor.run()
