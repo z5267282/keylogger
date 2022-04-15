@@ -9,3 +9,9 @@ efficient()
 on_press()
 
 Listener(on_press=on_press if efficient else on_press)
+
+
+### Log delimiting
+
+Should be period marked on the application
++ Start to finish
