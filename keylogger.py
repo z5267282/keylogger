@@ -95,6 +95,7 @@ class Monitor:
         self.keys.start()
         self.mice.start()
         
+        print('ready!')
         self.keys.join()
         self.mice.join()
         with open('logs.json', 'w') as f:
