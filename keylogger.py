@@ -59,7 +59,6 @@ class Monitor:
 
     def __init__(self):
         # state variables
-        self.done = False
         self.logs = list()
         self.text = str()
         
@@ -76,10 +75,9 @@ class Monitor:
 
     def on_press(self, key):
         if (key == keyboard.Key.esc):
-            print('escaped!')
             if self.text:
                 self.logs.append({'o' : self.text})
-            self.done = True
+            self.mice.stop()
             return False
         
         try:
@@ -90,23 +88,15 @@ class Monitor:
 
     # pass in x and y to follow expected parameters of on_click
     def on_click(self, x, y, button, pressed):
-        if self.done:
-            return False
-
         if (pressed):
             self.record_raw_input({'m' : button.name.upper()})
 
     def run(self):
-        print('got into run()')
         self.keys.start()
         self.mice.start()
         
-        print('here')
-
-        while not self.done:
-            print('loop')
-            pass
-        
+        self.keys.join()
+        self.mice.join()
         with open('logs.json', 'w') as f:
             f.write(json.dumps(self.logs, indent=4))
         
