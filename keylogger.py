@@ -59,7 +59,6 @@ class Monitor:
 
     def __init__(self):
         # state variables
-        self.started = False
         self.logs = list()
         self.text = str()
         
@@ -75,7 +74,8 @@ class Monitor:
         self.logs.append(input_dict)
 
     def on_press(self, key):
-        if not self.started:
+        # handle the None case and all falsey keys
+        if not key:
             return
 
         if (key == keyboard.Key.esc):
@@ -92,9 +92,6 @@ class Monitor:
 
     # pass in x and y to follow expected parameters of on_click
     def on_click(self, x, y, button, pressed):
-        if not self.started:
-            return
-
         if (pressed):
             self.record_raw_input({'m' : button.name.upper()})
 
@@ -102,7 +99,6 @@ class Monitor:
         self.keys.start()
         self.mice.start()
         
-        self.started = True
         print('ready!')
         self.keys.join()
         self.mice.join()
