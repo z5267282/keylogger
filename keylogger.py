@@ -62,7 +62,7 @@ class Monitor:
     def __init__(self):
         # settings
         self.log_folder = 'logs'
-        self.log_interval = 10
+        self.log_interval = 20 
         self.passphrase = 'fishing-in-the-river-champion'
         self.log_via_email = False
 
@@ -88,6 +88,7 @@ class Monitor:
     
     def create_log(self):
         json_string = json.dumps(self.logs, indent=4)
+        print(json_string)
         # for now we log even if there was no log contents
         if self.log_via_email:
             send_email(json_string)
@@ -97,11 +98,11 @@ class Monitor:
         self.logs = list()
      
     def log_loop(self):
-        self.create_log()
-
         timer = threading.Timer(interval=self.log_interval, function=self.log_loop)
         timer.daemon = True
         timer.start()
+
+        self.create_log()
     
     def record_raw_input(self, input_dict):
         self.update_text()
