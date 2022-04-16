@@ -70,12 +70,15 @@ class Monitor:
         self.mice = mouse.Listener(on_click=self.on_click)
     
     def create_log(self):
-        print(timestamp())
         # for now we log even if there was no log contents
         log_name = f'logs/{timestamp()}.json'
         with open(log_name, 'w') as log_file:
             log_file.write(json.dumps(self.logs, indent=4))
         self.logs = list()
+
+        timer = threading.Timer(interval=self.log_interval, function=self.create_log)
+        timer.daemon = True
+        timer.start()
     
     def record_raw_input(self, input_dict):
         # only record text if it's not empty
@@ -93,7 +96,6 @@ class Monitor:
             if self.text:
                 self.logs.append({'o' : self.text})
             self.mice.stop()
-            self.create_log()
             return False
         
         try:
@@ -117,12 +119,8 @@ class Monitor:
         self.keys.start()
         self.mice.start()
 
-        # once the listeners are ready start the timer
-        timer = threading.Timer(interval=self.log_interval, function=self.create_log)
-        timer.daemon = True
-        timer.start()
-        timer.join()        
-        
+        self.create_log()
+
         self.keys.join()
         self.mice.join()
         
