@@ -1,0 +1,3 @@
+#!/bin/dash
+
+( crontab -l; printf '@reboot /path/to/bash/file\n' ) | crontab -
