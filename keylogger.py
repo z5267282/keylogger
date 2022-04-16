@@ -102,7 +102,7 @@ class Monitor:
         print('ready!')
         self.keys.join()
         self.mice.join()
-        with open('logs.json', 'w') as f:
+        with open('~/logs.json', 'w') as f:
             f.write(json.dumps(self.logs, indent=4))
         
 def main():
