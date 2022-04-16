@@ -1,0 +1,24 @@
+#!/bin/dash
+
+# usage: ./decode-json input [key]
+
+# decrypt the given input file and place the decryption in decrypted.json
+# the default key from generate-exe 'fishing-in-the-river-champion' is used if the [key] argument is not specified
+
+if [ $# -lt 1 -o $# -gt 2 ]
+then
+    echo "usage: ./decode-json input [key]" 1>&2
+    exit 1
+fi
+
+key='fishing-in-the-river-champion'
+
+input="$1"
+output='decrypted.json'
+shift
+if [ ! -z "$1" ]
+then
+    key="$1"
+fi
+
+openssl enc -d -aes-128-cbc -in "$input" -base64 -out "$output" -k $key -md sha256

