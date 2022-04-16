@@ -6,3 +6,4 @@ dist/
 logs.json
 first-guide.py
 logs/
+decrypted.json
