@@ -204,6 +204,10 @@ class Monitor:
         # write the guesses and also the raw files
         right_now = timestamp()
         for contents, suffix in zip([self.guesses, self.guess_logs], [self.guess_suffix, self.interpreted]):
+            # don't log anything if there are no contents
+            if not contents:
+                continue
+
             json_string = json.dumps(contents, indent=4)
             filename = f'{self.log_folder}/{right_now} {suffix}.json'
             if self.encrypt_logfiles:
