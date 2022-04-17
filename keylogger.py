@@ -113,7 +113,7 @@ class Monitor:
     def __init__(self):
         # settings as they appear in generate.exe
         self.log_interval = 60
-        self.encrypt_logfiles = False 
+        self.encrypt_logfiles = False
         self.exe_name = 'background-process'
         self.passphrase = 'fishing-in-the-river-champion'
         self.log_via_email = False
